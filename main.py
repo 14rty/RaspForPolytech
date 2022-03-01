@@ -1,3 +1,4 @@
+from pyexpat import model
 import random
 
 import xlsxwriter
@@ -35,7 +36,7 @@ def CreateMap(filename_map):
     worksheet['A2'].style = 'standart'
     for col in range(3, 39):
         worksheet["A" + str(2 * (col - 2) + 1)] = col - 2
-        print("(=)", col - 2, "A" + str(2 * (col - 2) + 1) + ":" + "A" + str((col - 2) * 2 + 2))
+        # print("(=)", col - 2, "A" + str(2 * (col - 2) + 1) + ":" + "A" + str((col - 2) * 2 + 2))
         worksheet.merge_cells("A" + str(2 * (col - 2) + 1) + ":" + "A" + str((col - 2) * 2 + 2))
         worksheet["A" + str(2 * (col - 2) + 1)].style = 'standart'
     for col in range(ord('B'), ord('J')):
@@ -51,11 +52,11 @@ def CreateMap(filename_map):
 
 # получаем цвет пердназначенный для модуля. У каждоого модуля есть свой цвет записанный в массиве и получается посредством вызова данной функции
 def add_color_cell(modules):
-    colors = ['2d3eeb', '16c01d', '668f9a', 'c4b148', '5e14a8', 'd4a289', '5a6c7c', 'e0639e', 'd3fcdc', 'a7b4e7']
+    colors = ['2d3eeb', '16c01d', '668f9a', 'c4b148', '5e14a8', 'd4a289', '5a6c7c', 'e0639e', 'd3fcdc', 'a7b4e7', 'a7b4a7', 'a7b4u7', 'a3b4e7', 'a7b2e7']
     colors = colors[0:len(modules)]
     s = dict()
     for i in range(len(modules)):
-        print(i, " ", str(modules[i]), str(colors[i]))
+        # print(i, " ", str(modules[i]), str(colors[i]))
         s[modules[i]] = colors[i]
     return s
 
@@ -86,13 +87,15 @@ def filling_map(filename_plan, filename_map):
     sem.sort()
     slow = dict()
     numer_none_slow = 1
-    color_modules = add_color_cell(modul)
-    print(color_modules)
     print(modul)
+    color_modules = add_color_cell(modul)
+    # print(color_modules)
+    # print(modul)
     for i in range(1, len(modul) + 1):
         slow[modul[i - 1]] = i
-    print("-=-", slow)
+    # print("-=-", slow)
     mm = []
+    print(slow)
     m = dict()
     ses = 0
     for i in range(2, ws.max_row + 1):
@@ -107,7 +110,7 @@ def filling_map(filename_plan, filename_map):
                 zet = int(zet)
                 test = term + str(key + 1)
                 cur = slow.get(ws["B" + str(i)].value)
-
+                print(ws["B" + str(i)].value, cur, "Alert")
                 if cur is None:
                     cur = str(len(slow) + numer_none_slow)
                     numer_none_slow += 1
@@ -115,7 +118,7 @@ def filling_map(filename_plan, filename_map):
                 dip = test + ':' + term + str(key)
                 m[ses] = [Name, str(cur), zet * 2,  # todo 2 - маштаб
                           color_modules.get(str(ws["B" + str(i)].value))]
-                print("+", m[ses], ws["B" + str(i)].value)
+                # print("+", m[ses], ws["B" + str(i)].value)
 
                 if ws["E" + str(i)].value != ws["E" + str(i + 1)].value:
                     #     print("___")
@@ -129,6 +132,8 @@ def filling_map(filename_plan, filename_map):
             zet = 0
     mm.append(m)
     pp = []
+    print(mm)
+    print("___")
     for x in mm:
 
         d = dict()
@@ -154,6 +159,7 @@ def filling_map(filename_plan, filename_map):
     curent = 0
     c = 0
     s = 2
+    print(pp)
     for i in range(2, ws.max_row + 1):
         if ws["I" + str(i)].value != None:
 
@@ -163,13 +169,26 @@ def filling_map(filename_plan, filename_map):
                 Name = ws["D" + str(i)].value
                 zet = int(zet)
                 test = term + str(s + 1)
-                if (len(pp[curent]) <= c):
-                    pass
+                print(len(pp[curent]), c)
+                if (c >= len(pp[curent])):
+                    c = c + 1
+                    if ws["E" + str(i)].value != ws["E" + str(i + 1)].value:
+                        # print("___")
+                        curent = curent + 1
+                        c = 0
+                        s = 2
+                        key = 2
+                        term = chr(ord(term) + 1)
+                    continue
+                print(len(pp[curent]), c)
+                print(pp[curent][c])
+                if (pp[curent][c] == []):
+                    break
                 s += pp[curent][c][1]
                 dip = test + ':' + term + str(s)
                 worksheet[test].style = 'standart'
                 worksheet.merge_cells(dip)
-                print(pp[curent][c], s, dip, test, str(pp[curent][c][0]))
+                # print(pp[curent][c], s, dip, test, str(pp[curent][c][0]))
                 worksheet[test] = str(pp[curent][c][0])
                 cell = worksheet[test]
                 cell.fill = openpyxl.styles.PatternFill(start_color=str(pp[curent][c][2]),
@@ -178,7 +197,7 @@ def filling_map(filename_plan, filename_map):
 
                 c = c + 1
                 if ws["E" + str(i)].value != ws["E" + str(i + 1)].value:
-                    print("___")
+                    # print("___")
                     curent = curent + 1
                     c = 0
                     s = 2
